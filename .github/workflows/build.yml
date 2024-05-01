@@ -1,35 +1,46 @@
-name: Rust
+name: Build and Publish
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install Wasm-pack
-      run: cargo install wasm-pack
-    
-    - name: Build
-      run: wasm-pack build --target=bundler --dev --out-name index
-            
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Install Wasm-pack
+        run: cargo install wasm-pack
 
-    - name: Build
-      working-directory: ./www
-      run: |
-        npm install
-        npx webpack
+      - name: Build
+        run: wasm-pack build --target=bundler --dev --out-name index
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Build
+        working-directory: ./www
+        run: |
+          npm install
+          npx webpack
+
+      - name: Github Pages - Setup
+        uses: actions/configure-pages@v5
+
+      - name: Github Pages - Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./www/dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
