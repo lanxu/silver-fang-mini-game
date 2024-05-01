@@ -1,0 +1,35 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Wasm-pack
+      run: cargo install wasm-pack
+    
+    - name: Build
+      run: wasm-pack build --target=bundler --dev --out-name index
+            
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Build
+      working-directory: ./www
+      run: |
+        npm install
+        npx webpack
